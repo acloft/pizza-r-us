@@ -1,12 +1,11 @@
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
-const routes = require('.routes.js')
+const routes = require('./routes.js')
 const dotenv = require('dotenv')
-const mongo = require('./app/mongodb')
-const mongodb = require('./mongodb')
-const conn = mongodb.connection
-const ObjectId = mongodb.ObjectId
+const mongo = require('./mongodb')
+const conn = mongo.connection
+const ObjectId = mongo.ObjectId
 
 
 dotenv.config()
@@ -28,8 +27,8 @@ app.use(function(req, res, next) {
  
 
 
-app.post("/register",registerUser);
-app.post("/login",loginUser);
+app.post("/api/register",registerUser);
+app.post("/api/login",loginUser);
 
 const port = 8080
 
@@ -38,9 +37,23 @@ mongo.connect(process.env.MONGODB_URL)
 .then(()=>console.log(`Magic happens on ${port}`))
 
 function registerUser(req, res){
-
+    createUser(req.body)
+    .then(data=>{
+        res.status(200).send(req.body)
+    })
+    .catch(err=>{
+        res.status(500).send(err)
+    })
+    
 }
 
 function loginUser(req, res){
 
+}
+
+function createUser(doc){
+    return conn.db().collection("users").insert(doc)
+    .then(data =>{
+        return data
+    })
 }
